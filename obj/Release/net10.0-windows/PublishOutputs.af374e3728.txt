@@ -1,0 +1,6 @@
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\RBLXHubLauncher.exe
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\download.jpg
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\RBLXHubLauncher.dll
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\RBLXHubLauncher.deps.json
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\RBLXHubLauncher.runtimeconfig.json
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\publish\RBLXHubLauncher.pdb

@@ -1,0 +1,14 @@
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\RBLXHubLauncher.exe
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\RBLXHubLauncher.deps.json
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\RBLXHubLauncher.runtimeconfig.json
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\bin\Release\net10.0-windows\RBLXHubLauncher.dll
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.MainWindow.resources
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.csproj.GenerateResource.cache
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.AssemblyInfoInputs.cache
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.AssemblyInfo.cs
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.csproj.CoreCompileInputs.cache
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.dll
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\refint\RBLXHubLauncher.dll
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\RBLXHubLauncher.genruntimeconfig.cache
+C:\Users\Alessio123\Desktop\2026E 2.9 Revert\2026E 2.9 Forever\RBLXHub Launcher\obj\Release\net10.0-windows\ref\RBLXHubLauncher.dll
