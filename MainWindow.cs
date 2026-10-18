@@ -36,8 +36,6 @@ public sealed partial class MainWindow : Form
 		"verity funk",
 		"fuck you rockstar games, fuck your game fuck your name fuck your millions fuck your billions",
 		"ask me anything!",
-		"fuck meatwad",
-		"fuck r6d",
 		"meow",
 		"hihi welcome thanks for using this launcher",
 		"wanna host?",
@@ -52,8 +50,11 @@ public sealed partial class MainWindow : Form
 		"fuck roblox",
 		"rblxhub forever is peak.",
 		"thanks for using my launcher.",
-		"fuck alzzmy.",
-		"fuck emote.community.",
+		"rblxhub forever > roblox",
+		"you're*",
+		"im glad you like using my launcher!",
+		"something something host, something something portwarp",
+		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 	];
     private static string BannerIndexPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
