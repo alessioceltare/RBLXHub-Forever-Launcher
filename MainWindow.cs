@@ -46,7 +46,7 @@ public sealed partial class MainWindow : Form
 		"wassap",
 		"i use arch btw",
 		"# arch install type shi",
-		"you ever just wanna sudo rm -rf --no-preserve-root?",
+		"you ever just wanna sudo rm -rf --no-preserve-root /?",
 		"fuck roblox",
 		"rblxhub forever is peak.",
 		"thanks for using my launcher.",
