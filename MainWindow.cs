@@ -54,7 +54,10 @@ public sealed partial class MainWindow : Form
 		"you're*",
 		"im glad you like using my launcher!",
 		"something something host, something something portwarp",
-		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+		"yo nice pc, can i have it?",
+		"nice wallpaper.",
+		"your computer is very safe... or is it? [vsauce music]",
 	];
     private static string BannerIndexPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
