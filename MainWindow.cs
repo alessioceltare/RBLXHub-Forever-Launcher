@@ -35,6 +35,26 @@ public sealed partial class MainWindow : Form
 		"idk what to add here",
 		"verity funk",
 		"fuck you rockstar games, fuck your game fuck your name fuck your millions fuck your billions",
+		"ask me anything!",
+		"meow",
+		"hihi welcome thanks for using this launcher",
+		"wanna host?",
+		"good whatever time it is for you.",
+		"kanye is cool",
+		"hi",
+		"hey",
+		"wassap",
+		"i use arch btw",
+		"# arch install type shi",
+		"you ever just wanna sudo rm -rf --no-preserve-root /?",
+		"fuck roblox",
+		"rblxhub forever is peak.",
+		"thanks for using my launcher.",
+		"rblxhub forever > roblox",
+		"you're*",
+		"im glad you like using my launcher!",
+		"something something host, something something portwarp",
+		"Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 	];
     private static string BannerIndexPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
@@ -64,6 +84,8 @@ public sealed partial class MainWindow : Form
         StartPosition = FormStartPosition.CenterScreen;
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
+        AutoScaleDimensions = new SizeF(96, 96);
+        AutoScaleMode = AutoScaleMode.Dpi;
         ClientSize = new Size(979, 573);
         BackColor = Color.FromArgb(23, 21, 21);
         ForeColor = Color.FromArgb(244, 244, 245);
@@ -72,6 +94,7 @@ public sealed partial class MainWindow : Form
         _backgroundImage = LoadEmbeddedBannerImage();
 
         LoadSavedOnboardingState();
+        LoadLauncherPreferences();
         AddNavigationButtons();
         AddHostingPanel();
         AddPlayerSettingsPanel();
@@ -303,6 +326,14 @@ public sealed partial class MainWindow : Form
                 UseVisualStyleBackColor = false,
                 Cursor = Cursors.Hand,
                 TabStop = false
+            };
+            button.SizeChanged += (_, _) =>
+            {
+                Region previousRegion = button.Region;
+                button.Region = CreateRoundedRegion(
+                    new Rectangle(Point.Empty, button.Size),
+                    Math.Max(4, (int)Math.Round(5f * DeviceDpi / 96f)));
+                previousRegion.Dispose();
             };
             button.FlatAppearance.BorderSize = 0;
             button.FlatAppearance.MouseOverBackColor = button.BackColor;

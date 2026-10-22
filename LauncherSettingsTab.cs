@@ -7,10 +7,79 @@ public sealed partial class MainWindow
 {
     private Label? _dllPathLabel;
     private Label? _rccPathLabel;
+    private bool _dllPathIsCustom;
     private static string RccSelectionPath => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "RBLXHubLauncher",
         "rcc-selection.json");
+    private static string LauncherPreferencesPath => Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "RBLXHubLauncher",
+        "launcher-preferences.json");
+
+    private void LoadLauncherPreferences()
+    {
+        if (!File.Exists(LauncherPreferencesPath))
+        {
+            return;
+        }
+
+        try
+        {
+            LauncherPreferences? preferences = JsonSerializer.Deserialize<LauncherPreferences>(
+                File.ReadAllText(LauncherPreferencesPath));
+            if (preferences is null)
+            {
+                return;
+            }
+
+            _headlessStudioEnabled = preferences.HeadlessStudio;
+            _prioritizeRccOverStudio = preferences.PrioritizeRcc;
+        }
+        catch (Exception exception) when (
+            exception is IOException or
+            UnauthorizedAccessException or
+            JsonException)
+        {
+            MessageBox.Show(
+                this,
+                $"Launcher preferences could not be loaded; defaults will be used.\n\n{exception.Message}",
+                "Launcher preferences",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+    }
+
+    private void SaveLauncherPreferences()
+    {
+        try
+        {
+            string? directory = Path.GetDirectoryName(LauncherPreferencesPath);
+            if (directory is not null)
+            {
+                Directory.CreateDirectory(directory);
+            }
+
+            string temporaryPath = LauncherPreferencesPath + ".tmp";
+            File.WriteAllText(
+                temporaryPath,
+                JsonSerializer.Serialize(new LauncherPreferences(
+                    _headlessStudioEnabled,
+                    _prioritizeRccOverStudio)));
+            File.Move(temporaryPath, LauncherPreferencesPath, overwrite: true);
+        }
+        catch (Exception exception) when (
+            exception is IOException or
+            UnauthorizedAccessException)
+        {
+            MessageBox.Show(
+                this,
+                $"Could not save launcher preferences.\n\n{exception.Message}",
+                "Launcher preferences",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
+    }
 
     private void AddLauncherSettingsPanel()
     {
@@ -85,11 +154,13 @@ public sealed partial class MainWindow
 
         Button headlessToggle = AddHostingButton(
             panel,
-            "OFF",
+            _headlessStudioEnabled ? "ON" : "OFF",
             new Point(650, 181),
             new Size(240, 34),
             13);
-        headlessToggle.BackColor = Color.FromArgb(64, 64, 64);
+        headlessToggle.BackColor = _headlessStudioEnabled
+            ? Color.FromArgb(53, 65, 194)
+            : Color.FromArgb(64, 64, 64);
         headlessToggle.FlatAppearance.MouseOverBackColor = headlessToggle.BackColor;
         headlessToggle.FlatAppearance.MouseDownBackColor = headlessToggle.BackColor;
         headlessToggle.Click += (_, _) =>
@@ -101,6 +172,7 @@ public sealed partial class MainWindow
                 : Color.FromArgb(64, 64, 64);
             headlessToggle.FlatAppearance.MouseOverBackColor = headlessToggle.BackColor;
             headlessToggle.FlatAppearance.MouseDownBackColor = headlessToggle.BackColor;
+            SaveLauncherPreferences();
         };
 
         var rccPriorityLabel = CreateSettingsLabel(
@@ -131,7 +203,18 @@ public sealed partial class MainWindow
                 : Color.FromArgb(64, 64, 64);
             rccPriorityToggle.FlatAppearance.MouseOverBackColor = rccPriorityToggle.BackColor;
             rccPriorityToggle.FlatAppearance.MouseDownBackColor = rccPriorityToggle.BackColor;
+            SaveLauncherPreferences();
         };
+
+        var versionLabel = CreateSettingsLabel(
+            "Launcher Version 1.1.0",
+            new Point(ClientSize.Width - 168, ClientSize.Height - 24),
+            new Size(160, 16),
+            8);
+        versionLabel.ForeColor = Color.FromArgb(105, 105, 105);
+        versionLabel.TextAlign = ContentAlignment.MiddleRight;
+        Controls.Add(versionLabel);
+        _launcherSettingsControls.Add(versionLabel);
 
         panel.Visible = false;
     }
@@ -200,17 +283,82 @@ public sealed partial class MainWindow
 
         if (dialog.ShowDialog(this) == DialogResult.OK)
         {
-            SetSelectedPath(pathLabel, dialog.SelectedPath);
+            try
+            {
+                SaveOnboardingState(_onboardingCompleted, dialog.SelectedPath);
+                _selectedRblxHubPath = dialog.SelectedPath;
+                SetSelectedPath(pathLabel, dialog.SelectedPath);
+                if (_dllPathLabel is not null && !_dllPathIsCustom)
+                {
+                    string dllPath = Path.Combine(dialog.SelectedPath, "gubbyRCC2.0.dll");
+                    SetSelectedPath(_dllPathLabel, dllPath);
+                }
+
+                RefreshPlayerSettingsForSelectedRoot();
+
+                var missingResources = new List<string>();
+                if (!Directory.Exists(Path.Combine(dialog.SelectedPath, "2026E")))
+                {
+                    missingResources.Add("2026E");
+                }
+
+                if (!Directory.Exists(Path.Combine(dialog.SelectedPath, "2026EStudio")))
+                {
+                    missingResources.Add("2026EStudio");
+                }
+
+                if (!Directory.Exists(Path.Combine(dialog.SelectedPath, "webserver")))
+                {
+                    missingResources.Add("webserver");
+                }
+
+                if (!_dllPathIsCustom &&
+                    !File.Exists(Path.Combine(dialog.SelectedPath, "gubbyRCC2.0.dll")))
+                {
+                    missingResources.Add("gubbyRCC2.0.dll");
+                }
+
+                if (missingResources.Count > 0)
+                {
+                    MessageBox.Show(
+                        this,
+                        "Could not find these expected files or folders in the selected " +
+                        "RBLXHUB folder:\n\n" +
+                        string.Join(Environment.NewLine, missingResources) +
+                        "\n\nSelect the folder that contains these resources.",
+                        "RBLXHUB resources not found",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception exception) when (
+                exception is IOException or
+                UnauthorizedAccessException or
+                InvalidOperationException)
+            {
+                MessageBox.Show(
+                    this,
+                    $"Could not save the selected RBLXHUB folder:\n\n{exception.Message}",
+                    "Could not save folder",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
     }
 
     private void BrowseForDll(Label pathLabel)
     {
+        string? previousPath = pathLabel.Tag as string;
         BrowseForFile(
             pathLabel,
             "DLL files (*.dll)|*.dll|All files (*.*)|*.*",
             "Select DLL",
             _selectedRblxHubPath);
+        if (pathLabel.Tag is string selectedPath &&
+            !string.Equals(selectedPath, previousPath, StringComparison.Ordinal))
+        {
+            _dllPathIsCustom = true;
+        }
     }
 
     private void BrowseForRcc(Label pathLabel)
@@ -255,7 +403,6 @@ public sealed partial class MainWindow
             "www",
             "DO_NOT_SHARE",
             fileName);
-
         if (!File.Exists(cookiePath))
         {
             MessageBox.Show(
@@ -408,4 +555,5 @@ public sealed partial class MainWindow
     }
 
     private sealed record RccSelection(string Path);
+    private sealed record LauncherPreferences(bool HeadlessStudio, bool PrioritizeRcc);
 }

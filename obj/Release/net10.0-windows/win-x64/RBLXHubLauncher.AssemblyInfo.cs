@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("RBLXHubLauncher")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a82c092451b34ab13fc09bce27427b8523af2b7d")]
 [assembly: System.Reflection.AssemblyProductAttribute("RBLXHubLauncher")]
 [assembly: System.Reflection.AssemblyTitleAttribute("RBLXHubLauncher")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

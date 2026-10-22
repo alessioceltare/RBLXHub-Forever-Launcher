@@ -8,6 +8,7 @@ namespace RBLXHubLauncher;
 public sealed partial class MainWindow
 {
     private readonly Dictionary<string, RoundedTextBox> _userJsonFields = [];
+    private Button? _verifiedBadgeToggle;
     private string? _userJsonPath;
     private Label _userJsonStatus = null!;
     private RoundedTextBox _proxyAddressField = null!;
@@ -81,6 +82,7 @@ public sealed partial class MainWindow
             new Point(8, 244),
             new Size(250, 40),
             13);
+        _verifiedBadgeToggle = verifiedToggle;
         verifiedToggle.Click += (_, _) =>
         {
             bool enabled = verifiedToggle.Text == "ON";
@@ -132,6 +134,16 @@ public sealed partial class MainWindow
         Controls.Add(layout);
         _playerSettingsControls.Add(layout);
         layout.Visible = false;
+    }
+
+    private void RefreshPlayerSettingsForSelectedRoot()
+    {
+        if (_verifiedBadgeToggle is not null)
+        {
+            LoadUserJsonSettings(_verifiedBadgeToggle);
+        }
+
+        RefreshPlaceIdFields();
     }
 
     private void RefreshPlaceIdFields()
@@ -255,7 +267,13 @@ public sealed partial class MainWindow
     {
         return _selectedRblxHubPath is null
             ? null
-            : Path.Combine(_selectedRblxHubPath, "webserver", "apache", "www", "v1", "asset.php");
+            : Path.Combine(
+                _selectedRblxHubPath,
+                "webserver",
+                "apache",
+                "www",
+                "v1",
+                "asset.php");
     }
 
     private void LoadPlaceIds()

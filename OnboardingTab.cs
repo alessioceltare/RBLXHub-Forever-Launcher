@@ -8,7 +8,7 @@ public sealed partial class MainWindow
 {
     private const string CertificateDirectoryRelativePath =
         @"webserver\apache\certificats";
-    private const string HostsEntriesRelativePath = @"webserver\hostsNEW9.txt";
+    private const string HostsEntriesSearchPattern = "hosts*.txt";
     private readonly List<Control> _onboardingControls = [];
     private string? _selectedRblxHubPath;
     private bool _pathStepComplete;
@@ -26,6 +26,31 @@ public sealed partial class MainWindow
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
         "RBLXHubLauncher",
         "onboarding.json");
+
+    private static string? FindHostsEntriesFile(string rblxHubPath)
+    {
+        string webserverDirectory = Path.Combine(rblxHubPath, "webserver");
+        return Directory.Exists(webserverDirectory)
+            ? Directory.EnumerateFiles(
+                    webserverDirectory,
+                    HostsEntriesSearchPattern,
+                    SearchOption.TopDirectoryOnly)
+                .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                .FirstOrDefault()
+            : null;
+    }
+
+    private static void SaveOnboardingState(bool completed, string rblxHubPath)
+    {
+        string stateDirectory = Path.GetDirectoryName(OnboardingStatePath)
+            ?? throw new InvalidOperationException("The onboarding settings directory is unavailable.");
+        Directory.CreateDirectory(stateDirectory);
+        string temporaryPath = OnboardingStatePath + ".tmp";
+        File.WriteAllText(
+            temporaryPath,
+            JsonSerializer.Serialize(new OnboardingState(completed, rblxHubPath)));
+        File.Move(temporaryPath, OnboardingStatePath, overwrite: true);
+    }
 
     private void LoadSavedOnboardingState()
     {
@@ -251,19 +276,39 @@ public sealed partial class MainWindow
         string certificateDirectory = Path.Combine(
             dialog.SelectedPath,
             CertificateDirectoryRelativePath);
-        string hostsEntriesPath = Path.Combine(dialog.SelectedPath, HostsEntriesRelativePath);
-        if (!Directory.Exists(certificateDirectory) ||
-            !File.Exists(hostsEntriesPath) ||
-            !Directory.EnumerateFiles(certificateDirectory, "*", SearchOption.AllDirectories)
-                .Any(IsSupportedCertificateFile))
+        string? hostsEntriesPath = FindHostsEntriesFile(dialog.SelectedPath);
+        var missingResources = new List<string>();
+        if (!Directory.Exists(certificateDirectory))
+        {
+            missingResources.Add(CertificateDirectoryRelativePath);
+        }
+        else if (!Directory.EnumerateFiles(certificateDirectory, "*", SearchOption.AllDirectories)
+                     .Any(IsSupportedCertificateFile))
+        {
+            missingResources.Add(
+                @"webserver\apache\certificats (no .cer, .crt, .der, or .pem certificate found)");
+        }
+
+        if (hostsEntriesPath is null)
+        {
+            missingResources.Add(@"webserver\hosts*.txt");
+        }
+
+        if (missingResources.Count > 0)
         {
             MessageBox.Show(
                 this,
-                "The selected folder must contain at least one .cer, .crt, .der, or .pem certificate in " +
-                "webserver\\apache\\certificats and the file webserver\\hostsNEW9.txt.",
+                "Could not find these required onboarding resources under the selected folder:\n\n" +
+                string.Join(Environment.NewLine, missingResources) +
+                "\n\nSelect the folder that contains these resources.",
                 "Folder not ready",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
+            return;
+        }
+
+        if (hostsEntriesPath is null)
+        {
             return;
         }
 
@@ -292,6 +337,7 @@ public sealed partial class MainWindow
         _hostsStepComplete = false;
         RefreshPlaceIdFields();
         MarkStepComplete(_selectPathButton, _onboardingPathStatus, "Selected");
+        _selectPathButton.Text = "Select Path";
         ResetStep(_installCertificatesButton, _certificateStatus, "Install");
         ResetStep(_addHostsButton, _hostsStatus, "Add Entries");
         _installCertificatesButton.Enabled = true;
@@ -407,13 +453,24 @@ public sealed partial class MainWindow
             return;
         }
 
-        string sourcePath = Path.Combine(_selectedRblxHubPath, HostsEntriesRelativePath);
+        string? sourcePath = FindHostsEntriesFile(_selectedRblxHubPath);
+        if (sourcePath is null)
+        {
+            MessageBox.Show(
+                this,
+                @"Could not find a hosts*.txt file directly in the selected folder's webserver directory.",
+                "Hosts file not found",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+            return;
+        }
+
         try
         {
             int entryCount = HostsFileInstaller.CountValidEntries(sourcePath);
             DialogResult consent = MessageBox.Show(
                 this,
-                $"Add {entryCount} host mapping(s) from webserver\\hostsNEW9.txt to the Windows hosts file? " +
+                $"Add {entryCount} host mapping(s) from webserver\\{Path.GetFileName(sourcePath)} to the Windows hosts file? " +
                 "This changes name resolution on this PC, creates a backup, and requests administrator approval.",
                 "Confirm hosts-file update",
                 MessageBoxButtons.YesNo,
@@ -473,14 +530,7 @@ public sealed partial class MainWindow
 
         try
         {
-            string stateDirectory = Path.GetDirectoryName(OnboardingStatePath)
-                ?? throw new InvalidOperationException("The onboarding settings directory is unavailable.");
-            Directory.CreateDirectory(stateDirectory);
-            string temporaryPath = OnboardingStatePath + ".tmp";
-            File.WriteAllText(
-                temporaryPath,
-                JsonSerializer.Serialize(new OnboardingState(true, _selectedRblxHubPath)));
-            File.Move(temporaryPath, OnboardingStatePath, overwrite: true);
+            SaveOnboardingState(true, _selectedRblxHubPath);
             _onboardingCompleted = true;
         }
         catch (Exception exception) when (

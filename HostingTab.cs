@@ -376,14 +376,14 @@ public sealed partial class MainWindow
             return;
         }
 
-        string clientDirectory = Path.Combine(_selectedRblxHubPath, "2026E");
-        string clientExecutable = Path.Combine(clientDirectory, "launcherthingyrelease.exe");
-        if (!File.Exists(clientExecutable))
+        (string clientDirectory, string clientExecutable)? client =
+            FindClientLauncher(_selectedRblxHubPath, AppContext.BaseDirectory);
+        if (client is null)
         {
-            _hostingOutput.Text = "launcherthingyrelease.exe not found in 2026E.";
+            _hostingOutput.Text = "Could not find 2026E\\launcherthingyrelease.exe in the selected folder or its parent folders.";
             MessageBox.Show(
                 this,
-                $"Could not find the client launcher at:\n{clientExecutable}",
+                "Could not find 2026E\\launcherthingyrelease.exe in the selected RBLXHub folder, its parent folders, or the launcher's parent folders.",
                 "Client launcher not found",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning);
@@ -394,8 +394,8 @@ public sealed partial class MainWindow
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = clientExecutable,
-                WorkingDirectory = clientDirectory,
+                FileName = client.Value.clientExecutable,
+                WorkingDirectory = client.Value.clientDirectory,
             };
             ConfigureCapturedOutput(startInfo);
             Process clientProcess = Process.Start(startInfo)
@@ -416,6 +416,50 @@ public sealed partial class MainWindow
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Error);
         }
+    }
+
+    private static (string clientDirectory, string clientExecutable)? FindClientLauncher(
+        params string[] startingDirectories)
+    {
+        var checkedDirectories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        foreach (string startingDirectory in startingDirectories)
+        {
+            DirectoryInfo? directory;
+            try
+            {
+                directory = new DirectoryInfo(startingDirectory).Exists
+                    ? new DirectoryInfo(startingDirectory)
+                    : null;
+            }
+            catch (Exception exception) when (
+                exception is ArgumentException or
+                IOException or
+                UnauthorizedAccessException or
+                PathTooLongException)
+            {
+                continue;
+            }
+
+            while (directory is not null)
+            {
+                string parentPath = directory.FullName;
+                if (checkedDirectories.Add(parentPath))
+                {
+                    string clientDirectory = Path.Combine(parentPath, "2026E");
+                    string clientExecutable = Path.Combine(
+                        clientDirectory,
+                        "launcherthingyrelease.exe");
+                    if (File.Exists(clientExecutable))
+                    {
+                        return (clientDirectory, clientExecutable);
+                    }
+                }
+
+                directory = directory.Parent;
+            }
+        }
+
+        return null;
     }
 
     private void StartStudio(object? sender, EventArgs e)
@@ -946,6 +990,14 @@ public sealed partial class MainWindow
         button.FlatAppearance.BorderSize = 0;
         button.FlatAppearance.MouseOverBackColor = button.BackColor;
         button.FlatAppearance.MouseDownBackColor = button.BackColor;
+        button.SizeChanged += (_, _) =>
+        {
+            Region? previousRegion = button.Region;
+            button.Region = CreateRoundedRegion(
+                new Rectangle(Point.Empty, button.Size),
+                Math.Max(4, (int)Math.Round(5f * DeviceDpi / 96f)));
+            previousRegion?.Dispose();
+        };
         parent.Controls.Add(button);
         return button;
     }
